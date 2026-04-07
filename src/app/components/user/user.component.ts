@@ -1,28 +1,40 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { User } from '../../models/user';
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { UserService } from '../../services/user.service';
 import { SharingDataService } from '../../services/sharing-data.service';
+import { PaginatorComponent } from '../paginator/paginator.component';
 
 @Component({
   selector: 'user',
-  imports: [RouterLink],
+  imports: [RouterLink, PaginatorComponent],
   templateUrl: './user.component.html',
 })
-export class UserComponent {
+export class UserComponent implements OnInit {
 
   title: string = 'Listado de usuarios'
   users: User[] = [];
-
+  paginator: any = {};
+  
   constructor(
     private router: Router,
     private service: UserService,
-    private sharingData: SharingDataService
-  ){
-    if(this.router.currentNavigation()?.extras.state)
-      this.users = this.router.currentNavigation()?.extras.state!['users'];
-    else
-      this.service.findAll().subscribe(users => this.users = users);
+    private sharingData: SharingDataService,
+    private route: ActivatedRoute,
+    private cd: ChangeDetectorRef
+  ){      
+  }
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      const page = +(params.get('page') || 0);
+      this.service.findAllPageable(page).subscribe(pageable => {
+        this.users = pageable.content as User[];
+        this.paginator = pageable;
+        this.sharingData.paginatorEventEmitter.emit({paginator: this.paginator});
+        this.cd.detectChanges();
+      });
+    });
   }
 
   onRemove(id: number): void{
@@ -30,6 +42,6 @@ export class UserComponent {
   }
 
   onSelectedUser(user: User): void{
-    this.router.navigate(['/users/edit/', user.id], {state: {user}})
+    this.router.navigate(['/users/edit/', user.id]);
   }
 }

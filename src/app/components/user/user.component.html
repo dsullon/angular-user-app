@@ -42,4 +42,5 @@
         </tbody>
     </table>
     <p><strong>Records count: </strong>{{users.length}}</p>
+    <paginator [paginator]="paginator" [url]="'/users/page'" />
 }

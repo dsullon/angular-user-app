@@ -10,6 +10,8 @@ export class SharingDataService {
   private _idUserEventEmitter: EventEmitter<number> = new EventEmitter();
   private _findUserEventEmitter: EventEmitter<number> = new EventEmitter();
   private _selectUserEventEmitter: EventEmitter<User> = new EventEmitter();
+  private _errorsUserFormEventEmitter: EventEmitter<any> = new EventEmitter();
+  private _paginatorEventEmitter: EventEmitter<any> = new EventEmitter();
 
   get newUserEventEmmitter(): EventEmitter<User> {
     return this._newUserEventEmmitter;
@@ -25,5 +27,13 @@ export class SharingDataService {
 
   get selectUserEventEmitter(): EventEmitter<User> {
     return this._selectUserEventEmitter;
+  }
+
+  get errorsUserFormEventEmitter(): EventEmitter<any> {
+    return this._errorsUserFormEventEmitter;
+  }
+
+  get paginatorEventEmitter(): EventEmitter<any> {
+    return this._paginatorEventEmitter;
   }
 }
