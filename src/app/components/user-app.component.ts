@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from "./navbar/navbar.component";
 import { SharingDataService } from '../services/sharing-data.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'user-app',
@@ -19,7 +20,8 @@ export class UserAppComponent implements OnInit{
   constructor(
     private router: Router,
     private service: UserService,
-    private sharingData: SharingDataService
+    private sharingData: SharingDataService,
+    private authService: AuthService
   ){
   }
   
@@ -27,6 +29,7 @@ export class UserAppComponent implements OnInit{
     this.saveUser();
     this.removeUser();
     this.paginatorEvents();
+    this.handlerLogin();
   }
 
   saveUser(): void {
@@ -89,5 +92,37 @@ export class UserAppComponent implements OnInit{
 
   paginatorEvents() {
     this.sharingData.paginatorEventEmitter.subscribe(pageable => this.paginator = pageable.paginator);
+  }
+
+  handlerLogin(){
+    this.sharingData.loginEventEmitter.subscribe(({username, password}) => {
+      this.authService.loginUser({username, password}).subscribe({
+        next: response => {
+          const token = response.token;
+          const payload = this.authService.getPayload(token);
+
+          const user = {username: payload.sub};
+          const login = {
+            user,
+            isAuth: true,
+            isAdmin: payload.isAdmin
+          }
+          this.authService.token = token;
+          this.authService.user = login;
+          this.router.navigate(['/users/page/0'])
+        },
+        error: error => {
+          if(error.status == 401){
+            Swal.fire(
+              'Error en el login',
+              error.error.message,
+              'error'
+            );
+          } else {
+            throw error;
+          }
+        }
+      })
+    })
   }
 }

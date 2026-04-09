@@ -48,32 +48,33 @@
                 
                 <div class="mb-3">
                     <input class="form-control"
-                        placeholder="UserName"
-                        name="userName"
-                        [(ngModel)] = "user.userName"
+                        placeholder="Username"
+                        name="username"
+                        [(ngModel)] = "user.username"
                         minlength="6"
                         #userName = "ngModel">
-                        @if(errors?.userName){
+                        @if(errors?.username){
                             <div class="text-danger">
-                                {{errors.userName}}
+                                {{errors.username}}
                             </div>
                         }
                 </div>
-                
-                <div class="mb-3">
-                    <input class="form-control"
-                        type="password"
-                        placeholder="Password"
-                        name="password"
-                        [(ngModel)] = "user.password"                        
-                        minlength="6"
-                        #password = "ngModel">
-                        @if(errors?.password){
-                            <div class="text-danger">
-                                {{errors.password}}
-                            </div>
-                        }
-                </div>
+                @if(user.id == 0){
+                    <div class="mb-3">
+                        <input class="form-control"
+                            type="password"
+                            placeholder="Password"
+                            name="password"
+                            [(ngModel)] = "user.password"                        
+                            minlength="6"
+                            #password = "ngModel">
+                            @if(errors?.password){
+                                <div class="text-danger">
+                                    {{errors.password}}
+                                </div>
+                            }
+                    </div>
+                }
 
                 <div>
                     <button 
