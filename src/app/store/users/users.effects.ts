@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
-import { UserService } from "../services/user.service";
+import { UserService } from "../../services/user.service";
 import { add, addSuccess, findAllPageable, load, remove, removeSuccess, setErrors, update, updateSuccess } from "./users.actions";
 import { catchError, EMPTY, exhaustMap, map, of, tap } from "rxjs";
-import { User } from "../models/user";
+import { User } from "../../models/user";
 import Swal from "sweetalert2";
 import { Router } from "@angular/router";
 
@@ -23,7 +23,7 @@ export class UsersEffects {
                         const paginator = pageable;
                         return findAllPageable({ users, paginator });
                     }),
-                    catchError((error) => of(setErrors({errors: error.error})))
+                    catchError((error) => of(error))
                 )
             )
         )
@@ -36,7 +36,7 @@ export class UsersEffects {
                 .pipe(
                     map(userNew => addSuccess({userNew})
                     ),
-                    catchError((error) => error.status == 400 ? of(setErrors({errors: error.error})): EMPTY)
+                    catchError((error) => error.status == 400 ? of(setErrors({userForm: action.userNew, errors: error.error})): of(error))
                 )
             )
         )
@@ -64,7 +64,7 @@ export class UsersEffects {
                 .pipe(
                     map(userUpdated => updateSuccess({userUpdated})
                     ),
-                    catchError((error) => error.status == 400 ? of(setErrors({errors: error.error})): EMPTY)
+                    catchError((error) => error.status == 400 ? of(setErrors({userForm: action.userUpdated, errors: error.error})): of(error))
                 )
             )
         )
@@ -90,9 +90,7 @@ export class UsersEffects {
             ofType(remove),
             exhaustMap(action => this.service.delete(action.id)
                 .pipe(
-                    map(id => removeSuccess({id})
-                    ),
-                    catchError((error) => error.status == 400 ? of(setErrors({errors: error.error})): EMPTY)
+                    map(() => removeSuccess({id: action.id}))
                 )
             )
         )

@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { User } from "../models/user";
+import { User } from "../../models/user";
 
 export const load = createAction('[Users] load', props<{page: number}>());
 export const findAll = createAction('[Users] findAll', props<{users: User[]}>());
@@ -12,6 +12,5 @@ export const updateSuccess = createAction('[Users] updateSuccess', props<{userUp
 export const remove = createAction('[Users] update', props<{id: number}>());
 export const removeSuccess = createAction('[Users] removeSuccess', props<{id: number}>());
 export const setPaginator = createAction('[Users] setPaginator', props<{paginator: any}>());
-export const setErrors = createAction('[Users] setErrors', props<{errors: any}>());
+export const setErrors = createAction('[Users] setErrors', props<{userForm: User, errors: any}>());
 export const resetUser = createAction('[Users] resetUser');
-export const setUserForm = createAction('[Users] setUserForm', props<{user: User}>());

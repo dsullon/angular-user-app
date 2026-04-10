@@ -1,23 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { authSelector } from '../store/auth/auth.selector';
+import { login, logout } from '../store/auth/auth.actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private url: string = "http://localhost:8080/login";
-  private _token: string | undefined;
-  private _user: any = {
-    user: undefined,
-    isAuth: false,
-    isAdmin: false
-  };
+
+  private _user: any;
 
   constructor(
+    private store: Store<{auth: any}>,
     private http: HttpClient
   ){
-
+    this.store.select(authSelector).subscribe(state =>{
+      this._user = state;
+    });
   }
 
   loginUser({username, password}: any): Observable<any>{
@@ -25,7 +27,6 @@ export class AuthService {
   }
 
   set user(user: any) {
-    this._user = user;    
     sessionStorage.setItem('login', JSON.stringify(user));
   }
 
@@ -45,13 +46,7 @@ export class AuthService {
   }
 
   get token() {
-    if(this._token != undefined){
-      return this._token;
-    } else if(sessionStorage.getItem('token') != null){
-      this._token = sessionStorage.getItem('token') || '';
-      return this._token;
-    }
-    return this._token!;
+    return sessionStorage.getItem('token')!;
   }
 
   getPayload(token: string){
@@ -69,12 +64,7 @@ export class AuthService {
   }
 
   logout() {
-    this._token = undefined;
-    this.user = {
-      user: undefined,
-      isAuth: false,
-      isAdmin: false
-    }
+    this.store.dispatch(logout());
     sessionStorage.removeItem('login');
     sessionStorage.removeItem('token');
   }

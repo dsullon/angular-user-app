@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
-import { User } from "../models/user";
-import { addSuccess, find, findAll, findAllPageable, load, removeSuccess, resetUser, setErrors, setPaginator, setUserForm, updateSuccess } from "./users.actions";
+import { User } from "../../models/user";
+import { addSuccess, find, findAll, findAllPageable, load, removeSuccess, resetUser, setErrors, setPaginator, updateSuccess } from "./users.actions";
 
 export interface UserState {
     users: User[],
@@ -23,16 +23,8 @@ export const usersReducer = createReducer(
         {
             users: state.users,
             paginator: state.paginator,
-            user: {...new User()},
+            user: {...new User},
             errors: {}
-        }
-    )),
-    on(setUserForm, (state, {user}) =>(
-        {
-            users: state.users,
-            paginator: state.paginator,
-            user: {...user},
-            errors: state.errors
         }
     )),
     on(load, (state, {page}) => (
@@ -79,16 +71,16 @@ export const usersReducer = createReducer(
         {
             users: [...state.users, {...userNew}],
             paginator: state.paginator,
-            user: state.user,
-            errors: state.errors
+            user: new User,
+            errors: {}
         }
     )),
     on(updateSuccess, (state, {userUpdated}) => (
         {
             users: state.users.map(u => (u.id == userUpdated.id) ? {...userUpdated}: u),
             paginator: state.paginator,
-            user: state.user,
-            errors: state.errors
+            user: {...new User},
+            errors: {}
         }
     )),
     on(removeSuccess, (state, {id}) => (
@@ -99,11 +91,11 @@ export const usersReducer = createReducer(
             errors: state.errors
         }
     )),
-    on(setErrors, (state, {errors}) => (
+    on(setErrors, (state, {userForm, errors}) => (
         {
             users: state.users,
             paginator: state.paginator,
-            user: state.user,
+            user: {...userForm},
             errors: {...errors}
         }
     ))
