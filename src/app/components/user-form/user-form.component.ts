@@ -1,9 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { User } from '../../models/user';
-import { SharingDataService } from '../../services/sharing-data.service';
 import { ActivatedRoute } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { Store } from '@ngrx/store';
+import { usersSelector } from '../../store/users.selector';
+import { add, find, resetUser, setUserForm, update } from '../../store/users.actions';
 
 @Component({
   selector: 'user-form',
@@ -11,45 +12,43 @@ import { UserService } from '../../services/user.service';
   templateUrl: './user-form.component.html',
 })
 export class UserFormComponent implements OnInit{
-  user: User = new User();
+  user: User;
   errors: any = {};
 
   constructor(
+    private store: Store<{users: any}>,
     private route: ActivatedRoute,
-    private sharingData: SharingDataService,
-    private service: UserService,
     private cd: ChangeDetectorRef
   ){
+    this.user = new User();
+    this.store.select(usersSelector).subscribe(state => {
+      this.errors = state.errors;
+      this.user = {...state.user};
+      this.cd.markForCheck();
+    })
   }
 
   ngOnInit(): void {
-    this.sharingData.errorsUserFormEventEmitter.subscribe(errors => {
-      this.errors = errors;
-      this.cd.detectChanges();
-    });
+    this.store.dispatch(resetUser());
     this.route.paramMap.subscribe(params => {
       const id: number = +(params.get('id') || '0');
       if( id > 0){
-        this.service.findById(id).subscribe(user => {
-          this.user = user;
-          //Object.assign(this.user, user);
-          this.cd.detectChanges();
-        });
-        
+        this.store.dispatch(find({id}));        
       }
     })
   }
 
-  onSubmit(userForm: NgForm): void {
-    const userData: User = {...this.user};
-    //if(userForm.valid)
-    this.sharingData.newUserEventEmmitter.emit(userData);
-    //userForm.reset();
-    //userForm.resetForm();
+  onSubmit(): void {
+    this.store.dispatch(setUserForm({user: this.user}))
+    if(this.user.id > 0){
+      this.store.dispatch(update({userUpdated: this.user}));
+    } else {
+      this.store.dispatch(add({userNew: this.user}));
+    }
   }
 
   onClear(userForm: NgForm): void {
-    //this.user.set(new User());
+    this.store.dispatch(resetUser());
     userForm.reset();
     userForm.resetForm();
   }
